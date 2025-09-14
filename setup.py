@@ -29,6 +29,7 @@ setup(
             'turtle_square = turtle_control.turtle_square:main',
             'autoturtle = turtle_control.autoturtle:main',
             'automoveinput = turtle_control.automoveinput:main',
+            'turtle = turtle_control.turtle:main',
         ],
     },
 )
