@@ -10,7 +10,7 @@ class ArucoDetector(Node):
         super().__init__('aruco_detector')
 
         
-        calib_file = "/home/ashra/ros2_ws/src/turtle_controls/turtle_control/calibration_data.npz"
+        calib_file = "/home/xylon/ros2_ws/src/mars_rover_nav/calibration_data.npz"
         calib_data = np.load(calib_file)
         self.camera_matrix = calib_data["camera_matrix"]
         self.dist_coeffs = calib_data["dist_coeffs"]
@@ -30,7 +30,7 @@ class ArucoDetector(Node):
             return
 
         
-        self.timer = self.create_timer(1.0 / 30.0, self.detect_callback)
+        self.timer = self.create_timer(1.0 / 15.0, self.detect_callback)
         self.get_logger().info("ArUco detector node started.")
 
     def detect_callback(self):
@@ -47,22 +47,22 @@ class ArucoDetector(Node):
             aruco.drawDetectedMarkers(frame, corners, ids)
             rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(corners, self.marker_length, self.camera_matrix, self.dist_coeffs)
 
-            # --- Show each marker info ---
-            y_offset = 40  # start y position for text
+            -
+            y_offset = 40  
             for idx, (marker_id, rvec, tvec) in enumerate(zip(ids, rvecs, tvecs)):
                 aruco.drawAxis(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.03)
                 dist = np.linalg.norm(tvec)
 
-                # Bearing angle from camera center
+              
                 angle = np.arctan2(tvec[0][0], tvec[0][2])
                 bearing_deg = np.degrees(angle)
 
-                # Display details for this marker
-                text = f"ID: {marker_id[0]} | Dist: {dist:.2f} m | Bearing: {bearing_deg:.1f}°"
+                
+                text = f"ID: {marker_id[0]} | Dist: {dist:.2f} m | Bearing: {bearing_deg:.1f} deg"
                 cv2.putText(
                     frame,
                     text,
-                    (10, y_offset + idx * 30),  # shift down per marker
+                    (10, y_offset + idx * 30), 
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.7,
                     (0, 255, 0),
@@ -71,8 +71,7 @@ class ArucoDetector(Node):
 
                 self.get_logger().info(text)
 
-            # --- Distances between markers ---
-            y_offset += len(ids) * 30  # start new section under marker info
+            y_offset += len(ids) * 30  
             for i in range(len(ids)):
                 for j in range(i + 1, len(ids)):
                     dist_between = np.linalg.norm(tvecs[i][0] - tvecs[j][0])
