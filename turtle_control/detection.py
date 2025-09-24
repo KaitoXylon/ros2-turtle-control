@@ -47,7 +47,7 @@ class ArucoDetector(Node):
             aruco.drawDetectedMarkers(frame, corners, ids)
             rvecs, tvecs, _ = aruco.estimatePoseSingleMarkers(corners, self.marker_length, self.camera_matrix, self.dist_coeffs)
 
-            -
+            
             y_offset = 40  
             for idx, (marker_id, rvec, tvec) in enumerate(zip(ids, rvecs, tvecs)):
                 aruco.drawAxis(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.03)
