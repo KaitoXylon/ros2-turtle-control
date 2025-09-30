@@ -23,7 +23,7 @@ class ArucoDetector(Node):
         self.marker_length = 0.118  
 
     
-        self.cap = cv2.VideoCapture("http://192.168.0.104:8080/video")
+        self.cap = cv2.VideoCapture("http://192.168.0.102:8080/video")
 
         if not self.cap.isOpened():
             self.get_logger().error("Cannot open camera.")
@@ -51,6 +51,8 @@ class ArucoDetector(Node):
             y_offset = 40  
             for idx, (marker_id, rvec, tvec) in enumerate(zip(ids, rvecs, tvecs)):
                 aruco.drawAxis(frame, self.camera_matrix, self.dist_coeffs, rvec, tvec, 0.03)
+
+
                 dist = np.linalg.norm(tvec)
 
               
@@ -72,17 +74,38 @@ class ArucoDetector(Node):
                 self.get_logger().info(text)
 
             y_offset += len(ids) * 30  
-            for i in range(len(ids)):
-                for j in range(i + 1, len(ids)):
-                    dist_between = np.linalg.norm(tvecs[i][0] - tvecs[j][0])
-                    text = f"ID {ids[i][0]} <-> ID {ids[j][0]}: {dist_between:.2f} m"
+
+            tvecs_flat = tvecs.reshape(-1, 3)
+
+            sorted_marker = np.argsort([np.linalg.norm(t) for t in tvecs_flat])
+            
+            for i in range(len(sorted_marker)):
+                for j in range(i + 1, len(sorted_marker)):
+
+                    closer = tvecs_flat[sorted_marker[i]]
+                    further = tvecs_flat[sorted_marker[j]]
+
+
+                    dist_between = np.linalg.norm(further - closer)
+
+                    angle_between = np.degrees(np.arctan2(further[0]- closer[0], further[2]- closer[2]))
+
+                    if angle_between >0:
+                        turn = "RIght"
+                    elif angle_between <0:
+                        turn = "Left"
+                    else :
+                        turn = "Straight"
+
+
+                    text = f"ID {ids[i][0]} <-> ID {ids[j][0]}: {dist_between:.2f} m & Angle = {angle_between:.2f} & Turn : {turn}"
                     cv2.putText(
                         frame,
                         text,
                         (10, y_offset),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.6,
-                        (255, 0, 0),
+                        (0, 255, 255),
                         2,
                     )
                     y_offset += 25
